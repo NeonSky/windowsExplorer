@@ -2,14 +2,33 @@
 #include <iostream>
 #include <time.h>
 
-static const int cursorSpread = 500;
+#define isDebugging true
 
+static const int cursorSpread = 10;
+bool isRunning = true;
 
-void moveCursor() {
+POINT moveCursor() {
   POINT cursorPos;
   GetCursorPos(&cursorPos);
   SetCursorPos(cursorPos.x + rand()%cursorSpread-cursorSpread/2,
               cursorPos.y + rand()%cursorSpread-cursorSpread/2);
+  return cursorPos;
+}
+
+void leftClick() {
+  INPUT Input={0};
+  Input.type = INPUT_MOUSE;
+  Input.mi.dwFlags =  MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP;
+
+  SendInput(1, &Input, sizeof(INPUT));
+}
+
+void rightClick() {
+  INPUT Input={0};
+  Input.type = INPUT_MOUSE;
+  Input.mi.dwFlags =  MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP;
+
+  SendInput(1, &Input, sizeof(INPUT));
 }
 
 bool isBreakKeyPressed() {
@@ -20,20 +39,23 @@ bool isBreakKeyPressed() {
 void update() {
 
   moveCursor();
+  rightClick();
+  leftClick();
   Sleep(10);
 
   // Quit on escape key
-  if(isBreakKeyPressed()) {
-    break;
-    std::cin.ignore();
-  }
-
+  #ifdef isDebugging
+    if(isBreakKeyPressed()) {
+      isRunning = false;
+      std::cin.ignore();
+    }
+  #endif
 }
 
 int main() {
   srand(time(0));
 
-  while(true) {
+  while(isRunning) {
     update();
   }
 
